@@ -1,0 +1,36 @@
+
+-- Combine tables into one unified dataset and create a temp table to query data from all tables
+
+with hotels as (
+select * from dbo.['2018$']
+union
+select * from dbo.['2019$']
+union
+select * from dbo.['2020$'])
+
+-- Is the hotel revenue growing by year?  In order to see this, a new column was created by adding together the stays_in_weekend_nights column and the stays_in_week_nights column.  
+-- The statement is multiplied by the adr (daily rate) and renamed to "revenue" to give it an alias
+-- Group by the arrival_date_year,sum, and round the totals in order to see if revenue is increasing by year
+-- Per the stakeholder's request, the data needs to also be broken down by hotel type so the hotel column was added in order to achieve this
+
+select 
+arrival_date_year,
+hotel,
+round(sum((stays_in_week_nights+stays_in_weekend_nights) *adr), 2) as revenue 
+from hotels
+group by arrival_date_year, hotel
+
+-- Joining additional tables to include data on visualization 
+
+with hotels as (
+select * from dbo.['2018$']
+union
+select * from dbo.['2019$']
+union
+select * from dbo.['2020$'])
+
+select * from hotels
+left join dbo.market_segment$
+on hotels.market_segment = market_segment$.market_segment
+left join dbo.meal_cost$
+on meal_cost$.meal = hotels.meal
