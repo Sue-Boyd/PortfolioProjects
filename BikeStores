@@ -1,0 +1,37 @@
+SELECT
+	ord.order_id,
+	CONCAT(cus.first_name, ' ', cus.last_name) AS 'customers',
+	cus.city,
+	cus.state,
+	ord.order_date,
+	SUM(ite.quantity) AS 'total_units', 
+	SUM(ite.quantity * ite.list_price) AS 'revenue',     -- We want to know the sales volume and total revenue generated
+	pro.product_name,
+	cat.category_name,                           -- We also want to know the category of the products that were purchased
+	sto.store_name,                              -- We also want to know the store at which the sales took place
+	CONCAT(sta.first_name, ' ', sta.last_name) AS 'sales_rep' -- We also want to know the sales rep who made the sale 
+FROM sales.orders ord
+JOIN sales.customers cus
+ON ord.customer_id = cus.customer_id
+JOIN sales.order_items ite
+ON ord.order_id = ite.order_id
+JOIN production.products pro                 -- We also want to know the name of the products that were purchased
+ON ite.product_id = pro.product_id
+JOIN production.categories cat
+ON pro.category_id = cat.category_id
+JOIN sales.stores sto
+ON ord.store_id = sto.store_id
+JOIN sales.staffs sta
+ON ord.staff_id = sta.staff_id
+GROUP BY                                    -- Because there are multiple functions in this query, the other fields must be grouped in order for the script to work
+	ord.order_id,
+	CONCAT(cus.first_name, ' ', cus.last_name),
+	cus.city,
+	cus.state,
+	ord.order_date,
+	pro.product_name,
+	cat.category_name,
+	sto.store_name,
+	CONCAT(sta.first_name, ' ', sta.last_name)
+
+                                            -- The next step is to review the data to see if there are any unwanted or redundant values
